@@ -1,0 +1,15 @@
+# TaxHub — Render deployment configuration.
+#
+# GEMINI_API_KEY must be set manually in the Render dashboard
+# under Environment → Environment Variables.
+# It must NOT be added to this file.
+
+services:
+  - type: web
+    name: taxhub
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false   # value set in Render dashboard only — never committed here

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TaxHub — Internal Staff Assistant</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    /* ── Reset & base ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy:      #1a2744;
+      --navy-mid:  #243360;
+      --blue:      #2563eb;
+      --blue-pale: #eff6ff;
+      --green:     #166534;
+      --green-bg:  #f0fdf4;
+      --amber:     #92400e;
+      --amber-bg:  #fffbeb;
+      --red:       #991b1b;
+      --red-bg:    #fef2f2;
+      --draft-bg:  #fefce8;
+      --draft-border: #ca8a04;
+      --text:      #111827;
+      --muted:     #6b7280;
+      --border:    #e5e7eb;
+      --radius:    8px;
+      --shadow:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #f3f4f6;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── Header ────────────────────────────────────────────────────────── */
+    header {
+      background: var(--navy);
+      color: #fff;
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header-brand { display: flex; align-items: baseline; gap: 0.75rem; }
+    .header-brand h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
+    .header-brand span {
+      font-size: 0.8rem;
+      color: #93c5fd;
+      font-weight: 400;
+      white-space: nowrap;
+    }
+    .header-badge {
+      font-size: 0.72rem;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+    .badge-demo {
+      background: #fbbf24;
+      color: #1a2744;
+    }
+    .badge-fictional {
+      background: #374151;
+      color: #d1d5db;
+      margin-left: 0.5rem;
+    }
+
+    /* ── Layout ────────────────────────────────────────────────────────── */
+    main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+    /* ── Card ──────────────────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.85rem;
+    }
+
+    /* ── Question section ──────────────────────────────────────────────── */
+    #question-input {
+      width: 100%;
+      min-height: 90px;
+      padding: 0.75rem 1rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.95rem;
+      font-family: inherit;
+      resize: vertical;
+      transition: border-color 0.15s;
+    }
+    #question-input:focus {
+      outline: none;
+      border-color: var(--blue);
+    }
+    .question-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 0.85rem;
+      flex-wrap: wrap;
+    }
+    #submit-btn {
+      background: var(--blue);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.55rem 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    #submit-btn:hover { background: #1d4ed8; }
+    #submit-btn:disabled { background: #9ca3af; cursor: default; }
+
+    .demo-label {
+      font-size: 0.75rem;
+      color: var(--muted);
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .demo-questions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .demo-btn {
+      background: var(--blue-pale);
+      color: var(--blue);
+      border: 1px solid #bfdbfe;
+      border-radius: 5px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .demo-btn:hover { background: #dbeafe; }
+
+    /* ── Loading ───────────────────────────────────────────────────────── */
+    #loading {
+      display: none;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      background: var(--blue-pale);
+      border: 1px solid #bfdbfe;
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--blue);
+      font-weight: 500;
+    }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid #bfdbfe;
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Error panel ───────────────────────────────────────────────────── */
+    #error-panel {
+      display: none;
+      border-radius: var(--radius);
+      padding: 1.1rem 1.4rem;
+      margin-bottom: 1.25rem;
+      border-left: 4px solid;
+    }
+    #error-panel.no-key, #error-panel.connection-error {
+      background: var(--amber-bg); border-color: #d97706; color: var(--amber);
+    }
+    #error-panel.invalid-key {
+      background: var(--red-bg); border-color: #dc2626; color: var(--red);
+    }
+    #error-panel.access-denied, #error-panel.rate-limit {
+      background: var(--red-bg); border-color: #dc2626; color: var(--red);
+    }
+    #error-panel.api-error, #error-panel.unexpected {
+      background: var(--red-bg); border-color: #dc2626; color: var(--red);
+    }
+    #error-panel h3 { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.35rem; }
+    #error-panel p { font-size: 0.87rem; line-height: 1.5; }
+    .error-note {
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      opacity: 0.8;
+    }
+
+    /* ── Evidence section ──────────────────────────────────────────────── */
+    #evidence-section { display: none; }
+    .evidence-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .evidence-note strong { color: var(--text); }
+
+    .chunk-card {
+      border: 1px solid #dbeafe;
+      border-radius: 6px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.75rem;
+      background: var(--blue-pale);
+    }
+    .chunk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .chunk-meta { flex: 1; min-width: 0; }
+    .chunk-source {
+      font-size: 0.74rem;
+      color: var(--muted);
+      font-weight: 600;
+      font-family: ui-monospace, monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chunk-heading {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-top: 0.15rem;
+    }
+    .chunk-score-block { text-align: right; flex-shrink: 0; }
+    .chunk-score-num {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--blue);
+      font-family: ui-monospace, monospace;
+    }
+    .score-bar-track {
+      height: 4px;
+      background: #bfdbfe;
+      border-radius: 2px;
+      width: 80px;
+      margin-top: 4px;
+    }
+    .score-bar-fill {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+    .chunk-preview {
+      font-size: 0.82rem;
+      color: #374151;
+      line-height: 1.55;
+      border-top: 1px solid #bfdbfe;
+      padding-top: 0.6rem;
+      margin-top: 0.5rem;
+    }
+
+    /* ── Answer section ────────────────────────────────────────────────── */
+    #answer-section { display: none; }
+    .answer-body {
+      font-size: 0.93rem;
+      line-height: 1.7;
+      color: var(--text);
+    }
+    /* Markdown styles inside answer */
+    .answer-body h2 { font-size: 1rem; margin: 1rem 0 0.4rem; color: var(--navy); }
+    .answer-body h3 { font-size: 0.95rem; margin: 0.9rem 0 0.35rem; color: var(--navy); }
+    .answer-body p { margin-bottom: 0.7rem; }
+    .answer-body ul, .answer-body ol { margin: 0.4rem 0 0.7rem 1.4rem; }
+    .answer-body li { margin-bottom: 0.25rem; }
+    .answer-body strong { color: var(--navy); }
+    .answer-body table { border-collapse: collapse; width: 100%; margin: 0.75rem 0; font-size: 0.85rem; }
+    .answer-body th { background: var(--navy); color: #fff; padding: 0.5rem 0.75rem; text-align: left; }
+    .answer-body td { padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--border); }
+    .answer-body tr:nth-child(even) td { background: #f9fafb; }
+    .answer-body blockquote {
+      border-left: 3px solid var(--blue);
+      padding-left: 0.9rem;
+      color: var(--muted);
+      margin: 0.5rem 0;
+    }
+    .answer-body code {
+      background: #f3f4f6;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 0.87em;
+      font-family: ui-monospace, monospace;
+    }
+
+    /* ── Draft section ─────────────────────────────────────────────────── */
+    #draft-section { display: none; }
+    #draft-section .card {
+      background: var(--draft-bg);
+      border-color: #fde68a;
+      border-left: 4px solid var(--draft-border);
+    }
+    .draft-warning {
+      font-size: 0.8rem;
+      color: #92400e;
+      background: #fef3c7;
+      border: 1px solid #fde68a;
+      border-radius: 5px;
+      padding: 0.5rem 0.8rem;
+      margin-bottom: 1rem;
+      font-weight: 500;
+    }
+    .draft-body {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      font-family: inherit;
+      color: #1c1917;
+    }
+    .draft-body p { margin-bottom: 0.6rem; }
+    .draft-copy-btn {
+      margin-top: 0.9rem;
+      background: none;
+      border: 1px solid var(--draft-border);
+      color: #92400e;
+      border-radius: 5px;
+      padding: 0.3rem 0.8rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .draft-copy-btn:hover { background: #fef3c7; }
+
+    /* ── Footer ────────────────────────────────────────────────────────── */
+    footer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      padding: 2rem 0 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <h1>TaxHub</h1>
+    <span>Internal Staff Assistant &mdash; Kleinunternehmerregelung (§&nbsp;19&nbsp;UStG)</span>
+  </div>
+  <div>
+    <span class="header-badge badge-demo">DEMO</span>
+    <span class="header-badge badge-fictional">Musterkanzlei Fischer &amp; Kollegen</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── Question ─────────────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-title">Staff Question</div>
+    <textarea
+      id="question-input"
+      placeholder="Enter a client question or internal query…"
+      onkeydown="handleKey(event)"
+    ></textarea>
+    <div class="question-actions">
+      <button id="submit-btn" onclick="submitQuestion()">Ask TaxHub</button>
+      <span class="demo-label">Demo questions:</span>
+      <div class="demo-questions">
+        <button class="demo-btn" onclick="setQuestion(QUESTIONS.t1)" title="Test 1 — primary demo case">T1 — Threshold exceeded</button>
+        <button class="demo-btn" onclick="setQuestion(QUESTIONS.t2)" title="Test 2 — old-law trap">T2 — €50k old-law trap</button>
+        <button class="demo-btn" onclick="setQuestion(QUESTIONS.t3)" title="Test 3 — out-of-scope refusal">T3 — Out of scope</button>
+        <button class="demo-btn" onclick="setQuestion(QUESTIONS.t4)" title="Test 4 — missing information">T4 — Missing revenue data</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────────────── -->
+  <div id="loading">
+    <div class="spinner"></div>
+    Retrieving source evidence and generating grounded answer&hellip;
+  </div>
+
+  <!-- ── Error ────────────────────────────────────────────────────────── -->
+  <div id="error-panel">
+    <h3 id="error-title"></h3>
+    <p id="error-message"></p>
+    <p class="error-note" id="error-note"></p>
+  </div>
+
+  <!-- ── Evidence ─────────────────────────────────────────────────────── -->
+  <div id="evidence-section">
+    <div class="card">
+      <div class="card-title">Retrieved Source Evidence</div>
+      <p class="evidence-note">
+        <strong>These are the actual chunks passed to the model</strong> &mdash;
+        inspect this panel alongside the answer to verify grounding.
+        Scores are TF-IDF cosine similarity against the query.
+      </p>
+      <div id="chunks-container"></div>
+    </div>
+  </div>
+
+  <!-- ── Answer ───────────────────────────────────────────────────────── -->
+  <div id="answer-section">
+    <div class="card">
+      <div class="card-title">Grounded Answer</div>
+      <div id="answer-content" class="answer-body"></div>
+    </div>
+  </div>
+
+  <!-- ── Draft ────────────────────────────────────────────────────────── -->
+  <div id="draft-section">
+    <div class="card">
+      <div class="card-title">Draft Client Response</div>
+      <div class="draft-warning">
+        &#9888; For staff review only &mdash; do not send to client without partner sign-off
+        (firm checklist, Step&nbsp;5).
+      </div>
+      <div id="draft-content" class="draft-body"></div>
+      <button class="draft-copy-btn" onclick="copyDraft()">Copy draft</button>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  TaxHub MVP &mdash; CITO Ventures take-home case &mdash; Fictional demo firm only.
+  Answers are grounded in retrieved source material and are not professional tax advice.
+  Free-tier hosting may take up to 60&nbsp;s to wake after inactivity.
+</footer>
+
+<script>
+  /* ── Demo questions (exact strings from 03_retrieval_test_cases.md) ── */
+  const QUESTIONS = {
+    t1: "I think I've exceeded the Kleinunternehmerregelung threshold. What does this mean and what do you need from me?",
+    t2: "A client's current-year turnover just crossed 50,000 euros — do they lose their Kleinunternehmer status?",
+    t3: "How do German inheritance tax allowances work for a client's second home?",
+    t4: "One of my clients asked if she needs to start charging VAT. I don't have her exact revenue numbers in front of me.",
+  };
+
+  /* ── Error title/note map ───────────────────────────────────────────── */
+  const ERROR_META = {
+    no_key:           { title: "No API Key Configured",              note: "Retrieval ran — source evidence below is real. Generation is unavailable until GEMINI_API_KEY is set in the deployment environment." },
+    invalid_key:      { title: "Invalid API Key",                    note: "The key was rejected by Gemini. Verify it is correct and active." },
+    access_denied:    { title: "API Access Denied — Billing or Quota Issue", note: "Check your Google AI Studio account for billing restrictions or exhausted credits." },
+    rate_limit:       { title: "Rate Limit Exceeded",                note: "Wait a moment and try again." },
+    api_error:        { title: "Gemini API Error",                   note: "Generation could not be completed. Check server logs." },
+    connection_error: { title: "Cannot Reach Gemini API",            note: "Server network connectivity issue. Try again shortly." },
+    unexpected:       { title: "Unexpected Server Error",            note: "Check server logs for details." },
+    network:          { title: "Cannot Reach TaxHub Server",         note: "Check your connection and try again." },
+    bad_request:      { title: "Bad Request",                        note: "" },
+  };
+
+  /* ── Helpers ────────────────────────────────────────────────────────── */
+  function setQuestion(text) {
+    document.getElementById("question-input").value = text;
+    document.getElementById("question-input").focus();
+  }
+
+  function handleKey(e) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) submitQuestion();
+  }
+
+  function hideResults() {
+    ["evidence-section", "answer-section", "draft-section", "error-panel", "loading"]
+      .forEach(id => {
+        const el = document.getElementById(id);
+        el.style.display = "none";
+      });
+  }
+
+  function showLoading(visible) {
+    document.getElementById("loading").style.display = visible ? "flex" : "none";
+    document.getElementById("submit-btn").disabled = visible;
+  }
+
+  function showError(type, message, chunks) {
+    const meta = ERROR_META[type] || { title: "Error", note: "" };
+    const panel = document.getElementById("error-panel");
+    panel.className = type.replace(/_/g, "-");
+    document.getElementById("error-title").textContent = meta.title;
+    document.getElementById("error-message").textContent = message;
+    document.getElementById("error-note").textContent = meta.note;
+    panel.style.display = "block";
+
+    if (chunks && chunks.length > 0) {
+      renderChunks(chunks);
+      document.getElementById("evidence-section").style.display = "block";
+    }
+  }
+
+  function renderChunks(chunks) {
+    const container = document.getElementById("chunks-container");
+    container.innerHTML = "";
+    chunks.forEach(c => {
+      const barPct = Math.min(c.score * 250, 100).toFixed(1);
+      container.insertAdjacentHTML("beforeend", `
+        <div class="chunk-card">
+          <div class="chunk-header">
+            <div class="chunk-meta">
+              <div class="chunk-source">${escHtml(c.source_file)}</div>
+              <div class="chunk-heading">${escHtml(c.heading)}</div>
+            </div>
+            <div class="chunk-score-block">
+              <div class="chunk-score-num">${c.score.toFixed(3)}</div>
+              <div class="score-bar-track">
+                <div class="score-bar-fill" style="width:${barPct}%"></div>
+              </div>
+            </div>
+          </div>
+          <div class="chunk-preview">${escHtml(c.preview)}&hellip;</div>
+        </div>
+      `);
+    });
+  }
+
+  function showResults(chunks, answer, draft) {
+    renderChunks(chunks);
+    document.getElementById("evidence-section").style.display = "block";
+
+    document.getElementById("answer-content").innerHTML = marked.parse(answer || "");
+    document.getElementById("answer-section").style.display = "block";
+
+    if (draft) {
+      document.getElementById("draft-content").textContent = draft;
+      document.getElementById("draft-section").style.display = "block";
+    }
+  }
+
+  function escHtml(str) {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function copyDraft() {
+    const text = document.getElementById("draft-content").textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector(".draft-copy-btn");
+      btn.textContent = "Copied!";
+      setTimeout(() => btn.textContent = "Copy draft", 2000);
+    });
+  }
+
+  /* ── Main submit ────────────────────────────────────────────────────── */
+  async function submitQuestion() {
+    const question = document.getElementById("question-input").value.trim();
+    if (!question) return;
+
+    hideResults();
+    showLoading(true);
+
+    try {
+      const resp = await fetch("/ask", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question }),
+      });
+
+      const data = await resp.json();
+
+      if (!resp.ok) {
+        showError(data.error_type || "unexpected", data.error || "Unknown error.", data.chunks || null);
+      } else {
+        showResults(data.chunks, data.answer, data.draft);
+      }
+
+    } catch (err) {
+      showError("network", "Could not reach the TaxHub server. Check your connection.", null);
+    } finally {
+      showLoading(false);
+    }
+  }
+</script>
+
+</body>
+</html>
