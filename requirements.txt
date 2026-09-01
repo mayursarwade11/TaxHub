@@ -1,4 +1,4 @@
-google-genai
+google-genai==1.47.0
 python-dotenv
 scikit-learn
 flask
