@@ -22,7 +22,7 @@
       --draft-bg:  #fefce8;
       --draft-border: #ca8a04;
       --text:      #111827;
-      --muted:     #6b7280;
+      --muted:     #4b5563;
       --border:    #e5e7eb;
       --radius:    8px;
       --shadow:    0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
@@ -90,7 +90,7 @@
     .card-title {
       font-size: 0.72rem;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
       color: var(--muted);
       margin-bottom: 0.85rem;
@@ -206,77 +206,32 @@
       opacity: 0.8;
     }
 
-    /* ── Evidence section ──────────────────────────────────────────────── */
-    #evidence-section { display: none; }
-    .evidence-note {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 1rem;
-      line-height: 1.5;
-    }
-    .evidence-note strong { color: var(--text); }
-
-    .chunk-card {
-      border: 1px solid #dbeafe;
-      border-radius: 6px;
-      padding: 1rem 1.1rem;
-      margin-bottom: 0.75rem;
-      background: var(--blue-pale);
-    }
-    .chunk-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 0.75rem;
-      margin-bottom: 0.5rem;
-    }
-    .chunk-meta { flex: 1; min-width: 0; }
-    .chunk-source {
-      font-size: 0.74rem;
-      color: var(--muted);
-      font-weight: 600;
-      font-family: ui-monospace, monospace;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .chunk-heading {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: var(--navy);
-      margin-top: 0.15rem;
-    }
-    .chunk-score-block { text-align: right; flex-shrink: 0; }
-    .chunk-score-num {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--blue);
-      font-family: ui-monospace, monospace;
-    }
-    .score-bar-track {
-      height: 4px;
-      background: #bfdbfe;
-      border-radius: 2px;
-      width: 80px;
-      margin-top: 4px;
-    }
-    .score-bar-fill {
-      height: 100%;
-      background: var(--blue);
-      border-radius: 2px;
-      transition: width 0.4s ease;
-    }
-    .chunk-preview {
-      font-size: 0.82rem;
-      color: #374151;
-      line-height: 1.55;
-      border-top: 1px solid #bfdbfe;
-      padding-top: 0.6rem;
-      margin-top: 0.5rem;
-    }
-
     /* ── Answer section ────────────────────────────────────────────────── */
     #answer-section { display: none; }
+    #answer-section .card {
+      border-left: 3px solid var(--blue);
+    }
+    .answer-status {
+      display: flex;
+      align-items: baseline;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.85rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+    }
+    .answer-status-primary {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--green);
+    }
+    .answer-status-primary::before {
+      content: "● ";
+    }
+    .answer-status-secondary {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
     .answer-body {
       font-size: 0.93rem;
       line-height: 1.7;
@@ -345,6 +300,140 @@
     }
     .draft-copy-btn:hover { background: #fef3c7; }
 
+    /* ── Evidence section ──────────────────────────────────────────────── */
+    #evidence-section { display: none; }
+
+    #evidence-section details { }
+    #evidence-section summary {
+      list-style: none;
+      cursor: pointer;
+      user-select: none;
+    }
+    #evidence-section summary::-webkit-details-marker { display: none; }
+
+    .evidence-summary-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .evidence-summary-card:hover {
+      background: #fafafa;
+    }
+    .evidence-summary-left { }
+    .evidence-summary-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .evidence-summary-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+    .evidence-toggle-icon {
+      font-size: 0.75rem;
+      color: var(--muted);
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+    details[open] .evidence-toggle-icon {
+      transform: rotate(90deg);
+    }
+
+    .evidence-body {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius) var(--radius);
+      padding: 1.25rem 1.5rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .evidence-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .evidence-note strong { color: var(--text); }
+
+    /* When open, summary card loses bottom radius to join the body */
+    details[open] .evidence-summary-card {
+      border-radius: var(--radius) var(--radius) 0 0;
+      border-bottom-color: var(--border);
+      margin-bottom: 0;
+    }
+    /* When closed, summary card has its own bottom margin */
+    details:not([open]) .evidence-summary-card {
+      margin-bottom: 1.25rem;
+    }
+
+    .chunk-card {
+      border: 1px solid #dbeafe;
+      border-radius: 6px;
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.75rem;
+      background: var(--blue-pale);
+    }
+    .chunk-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+    .chunk-meta { flex: 1; min-width: 0; }
+    .chunk-source {
+      font-size: 0.74rem;
+      color: var(--muted);
+      font-weight: 600;
+      font-family: ui-monospace, monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .chunk-heading {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-top: 0.15rem;
+    }
+    .chunk-score-block { text-align: right; flex-shrink: 0; }
+    .chunk-score-num {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--blue);
+      font-family: ui-monospace, monospace;
+    }
+    .score-bar-track {
+      height: 4px;
+      background: #bfdbfe;
+      border-radius: 2px;
+      width: 80px;
+      margin-top: 4px;
+    }
+    .score-bar-fill {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+    .chunk-preview {
+      font-size: 0.82rem;
+      color: #374151;
+      line-height: 1.55;
+      border-top: 1px solid #bfdbfe;
+      padding-top: 0.6rem;
+      margin-top: 0.5rem;
+    }
+
     /* ── Footer ────────────────────────────────────────────────────────── */
     footer {
       text-align: center;
@@ -402,23 +491,14 @@
     <p class="error-note" id="error-note"></p>
   </div>
 
-  <!-- ── Evidence ─────────────────────────────────────────────────────── -->
-  <div id="evidence-section">
-    <div class="card">
-      <div class="card-title">Retrieved Source Evidence</div>
-      <p class="evidence-note">
-        <strong>These are the actual chunks passed to the model</strong> &mdash;
-        inspect this panel alongside the answer to verify grounding.
-        Scores are TF-IDF cosine similarity against the query.
-      </p>
-      <div id="chunks-container"></div>
-    </div>
-  </div>
-
   <!-- ── Answer ───────────────────────────────────────────────────────── -->
   <div id="answer-section">
     <div class="card">
-      <div class="card-title">Grounded Answer</div>
+      <div class="card-title">TaxHub Answer</div>
+      <div class="answer-status">
+        <span class="answer-status-primary">Grounded response generated</span>
+        <span class="answer-status-secondary" id="answer-status-detail"></span>
+      </div>
       <div id="answer-content" class="answer-body"></div>
     </div>
   </div>
@@ -434,6 +514,29 @@
       <div id="draft-content" class="draft-body"></div>
       <button class="draft-copy-btn" onclick="copyDraft()">Copy draft</button>
     </div>
+  </div>
+
+  <!-- ── Evidence ─────────────────────────────────────────────────────── -->
+  <div id="evidence-section">
+    <details id="evidence-details">
+      <summary>
+        <div class="evidence-summary-card">
+          <div class="evidence-summary-left">
+            <div class="evidence-summary-title">Source Evidence</div>
+            <div class="evidence-summary-sub" id="evidence-summary-sub">Click to verify grounding</div>
+          </div>
+          <span class="evidence-toggle-icon">&#9654;</span>
+        </div>
+      </summary>
+      <div class="evidence-body">
+        <p class="evidence-note">
+          <strong>These are the actual chunks passed to the model</strong> &mdash;
+          inspect this panel alongside the answer to verify grounding.
+          Scores are TF-IDF cosine similarity against the query.
+        </p>
+        <div id="chunks-container"></div>
+      </div>
+    </details>
   </div>
 
 </main>
@@ -500,6 +603,7 @@
 
     if (chunks && chunks.length > 0) {
       renderChunks(chunks);
+      setEvidenceSummary(chunks.length, true /* openByDefault */);
       document.getElementById("evidence-section").style.display = "block";
     }
   }
@@ -529,10 +633,21 @@
     });
   }
 
+  function setEvidenceSummary(count, openByDefault) {
+    const noun = count === 1 ? "chunk" : "chunks";
+    document.getElementById("evidence-summary-sub").textContent =
+      `${count} ${noun} retrieved · Click to verify grounding`;
+    const details = document.getElementById("evidence-details");
+    details.open = !!openByDefault;
+  }
+
   function showResults(chunks, answer, draft) {
     renderChunks(chunks);
+    setEvidenceSummary(chunks.length, false /* collapsed by default */);
     document.getElementById("evidence-section").style.display = "block";
 
+    document.getElementById("answer-status-detail").textContent =
+      `${chunks.length} source${chunks.length === 1 ? "" : "s"} retrieved · Internal knowledge base`;
     document.getElementById("answer-content").innerHTML = marked.parse(answer || "");
     document.getElementById("answer-section").style.display = "block";
 
